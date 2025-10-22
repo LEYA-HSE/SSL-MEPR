@@ -1,0 +1,15 @@
+[grid]
+# hidden_dim = [128,256,512]
+hidden_dim = [256]
+# out_features = [256,512]
+# num_transformer_heads = [2,4,8,16]
+# dropout = [0.1, 0.15, 0.2]
+# single_task_id = [0,1,2,3]
+#alpha_sup = [1.0, 1.25, 1.5]
+#alpha_ssl = [ 1.0, 1.25, 1.5]
+#w_lr_sup = [0.005, 0.01]
+#w_lr_ssl = [0.005, 0.01]
+# lambda_ssl = [ 0.3, 0.4,0.5,0.6,0.7]
+
+[defaults]
+hidden_dim = 512

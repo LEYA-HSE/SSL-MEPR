@@ -1,0 +1,108 @@
+# ---------------------------
+# Dataset settings
+# ---------------------------
+
+[datasets.cmu_mosei]
+task = "emotions"
+base_dir = "/home/serg_fedchn/LEYA/EAAI_2025/Datasets/CMU-MOSEI"
+csv_path = "{base_dir}/{split}_body_union_2.csv"
+video_dir  = "{base_dir}/{split}/"
+
+[datasets.fiv2]
+task = "personality_traits"
+base_dir = "/home/serg_fedchn/LEYA/EAAI_2025/Datasets/FirstImpressionsV2"
+csv_path = "{base_dir}/{split}_body_union_2.csv"
+video_dir  = "{base_dir}/{split}/"
+
+# ---------------------------
+# DataLoader parameters
+# ---------------------------
+[dataloader]
+num_workers = 0
+shuffle = true
+prepare_only = false
+
+# ---------------------------
+# Training — general parameters
+# ---------------------------
+[train.general]
+random_seed = 42                  # fix random seed for reproducibility (0 = random each run)
+subset_size = 0                   # limit number of samples (0 = use full dataset)
+batch_size = 384                  # batch size
+num_epochs = 100                  # number of training epochs
+max_patience = 10                 # max epochs without improvement (Early Stopping)
+save_best_model = true            # save the best model
+save_prepared_data = true         # save extracted features (embeddings)
+save_feature_path = './features/' # path to store embeddings
+search_type = "none"              # search strategy: "greedy", "exhaustive", or "none"
+opt_set = 'dev'                   # split used for optimization
+
+# ---------------------------
+# Model parameters
+# ---------------------------
+[train.model]
+model_name                 = "FusionTransformer" # model name
+path_to_saved_fusion_model = "clip_fusion_transformer_transformer_mamba_best_model_dev.pt"
+model_stage                = 'fusion'            # training stage: personality, emotion, fusion
+per_activation             = "relu"              # activation for personality head (e.g., sigmoid, relu)
+weight_emotion             = 0.1                 # emotion loss weight (0.1 with class weighting, 1.0 without)
+weight_pers                = 1                   # personality loss weight
+pers_loss_type             = 'mae'               # ccc, mae, mse, rmse_bell, rmse_logcosh, RMGL
+flag_emo_weight            = true                # use class weights for emotion class imbalance
+hidden_dim                 = 768                 # hidden size
+num_transformer_heads      = 4                   # number of attention heads in the transformer
+tr_layer_number            = 5                   # number of transformer layers
+mamba_d_state              = 16                  # Mamba state size
+mamba_layer_number         = 5                   # number of Mamba layers
+positional_encoding        = true                # use positional encoding
+dropout                    = 0.1                 # inter-layer dropout
+out_features               = 256                 # final feature size before classification
+
+# best parameters for emotion and personality models
+best_per_activation             = "relu" # set only at the fusion stage according to the best model
+name_best_emo_model             = 'EmotionTransformer'
+path_to_saved_emotion_model     = "clip_emotion_transformer_best_model_dev_new.pt" # path to the best emotion model
+hidden_dim_emo                  = 512   # set only at the fusion stage according to the best model
+out_features_emo                = 128   # set only at the fusion stage according to the best model
+num_transformer_heads_emo       = 4     # set only at the fusion stage according to the best model
+tr_layer_number_emo             = 5     # set only at the fusion stage according to the best model
+positional_encoding_emo         = false # set only at the fusion stage according to the best model
+mamba_d_state_emo               = 8     # set only at the fusion stage according to the best model
+mamba_layer_number_emo          = 3     # set only at the fusion stage according to the best model
+# personality
+name_best_per_model             = 'PersonalityMamba'
+path_to_saved_personality_model = "clip_personality_mamba_best_model_dev_acc.pt" # path to the best personality model
+hidden_dim_per                  = 512   # set only at the fusion stage according to the best model
+out_features_per                = 512   # set only at the fusion stage according to the best model
+num_transformer_heads_per       = 16    # set only at the fusion stage according to the best model
+tr_layer_number_per             = 6     # set only at the fusion stage according to the best model
+positional_encoding_per         = false # set only at the fusion stage according to the best model
+mamba_d_state_per               = 4     # set only at the fusion stage according to the best model
+mamba_layer_number_per          = 7     # set only at the fusion stage according to the best model
+
+# ---------------------------
+# Optimizer parameters
+# ---------------------------
+[train.optimizer]
+optimizer = "adam"        # optimizer type: "adam", "adamw", "lion", "sgd", "rmsprop"
+lr = 1e-4                 # initial learning rate
+weight_decay = 0.0        # weight decay for regularization
+momentum = 0.9            # momentum (used only for SGD)
+
+# ---------------------------
+# Scheduler parameters
+# ---------------------------
+[train.scheduler]
+scheduler_type = "plateau" # scheduler type: "none", "plateau", "cosine", "onecycle" or HuggingFace-style ("huggingface_linear", "huggingface_cosine", "huggingface_cosine_with_restarts", etc.)
+warmup_ratio = 0.1         # fraction of warmup steps relative to total steps (0.1 = 10%)
+
+[embeddings]
+image_classifier_checkpoint = "torchscript_model_0_66_37_wo_gl.pth"
+image_model_type = "clip"   # resnet18, emo, emoresnet50, resnet50, clip
+image_embedding_dim = 512   # 2048 (emoresnet50, resnet50) and 512 (resnet18, emo, clip) — video embedding size
+cut_target_layer = 2        # 4 (emoresnet50), 2 (resnet18, resnet50), 3 (emo) — layer up to which to cut the model and extract features
+roi_video = "scene"         # region of interest: "body" or full "scene"
+counter_need_frames = 30    # number of frames to select uniformly from the whole video
+image_size = 224            # image width and height
+emb_normalize = false       # whether to L2-normalize the embedding vector
+device = "cuda"             # "cuda" or "cpu" — where to load the model
