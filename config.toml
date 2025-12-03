@@ -1,0 +1,125 @@
+# ─────────────────────────────
+# Telegram and Environment
+# ─────────────────────────────
+# To enable Telegram notifications:
+# 1. Create a .env file
+# 2. Install: pip install python-dotenv
+# 3. Inside the .env file, specify TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID
+# (Search online for how to create a bot and obtain your chat ID)
+use_telegram = true  # Telegram notifications (requires valid tokens)
+
+
+# ─────────────────────────────
+# Dataset Settings
+# ─────────────────────────────
+
+[datasets.cmu_mosei]
+base_dir = "E:/CMU-MOSEI/"
+csv_path = "{base_dir}/{split}_full.csv"
+video_dir = "{base_dir}/video/{split}/"
+audio_dir = "{base_dir}/audio/{split}/"
+
+[datasets.fiv2]
+base_dir = "E:/FirstImpressionsV2/"
+csv_path = "{base_dir}/{split}_full.csv"
+video_dir = "{base_dir}/video/{split}/"
+audio_dir = "{base_dir}/audio/{split}/"
+
+
+# ─────────────────────────────
+# DataLoader Parameters
+# ─────────────────────────────
+[dataloader]
+num_workers = 0
+shuffle = true
+prepare_only = false
+average_features = true
+
+
+# ─────────────────────────────
+# General Training Parameters
+# ─────────────────────────────
+[train.general]
+random_seed = 42                # fixed random seed (0 = random each run)
+subset_size = 0                 # subset limit (0 = use entire dataset)
+batch_size = 32                 # batch size
+num_epochs = 100                # total number of training epochs
+max_patience = 15               # max epochs without improvement (Early Stopping)
+save_best_model = true          # save the best model
+save_prepared_data = true       # save precomputed embeddings
+save_feature_path = "./features/" # path to save embeddings
+search_type = "exhaustive"      # "greedy", "exhaustive", or "none"
+checkpoint_dir = "checkpoints"
+device = "cuda"                 # "cuda" or "cpu"
+selection_metric = "mean_combo" # metric for model selection: mean_combo, mean_emo, mF1, mUAR, ACC, etc.
+single_task = false
+
+
+# ─────────────────────────────
+# Model Parameters
+# ─────────────────────────────
+[train.model]
+id_ablation_type_by_modality  = 0
+id_ablation_type_by_component = 6
+single_task_id = 0
+model_name = "FusionTransformer"    # model name
+model_stage = "fusion"              # stage: personality, emotion, fusion
+per_activation = "relu"             # activation for personality branch
+hidden_dim = 256                    # hidden layer size
+num_transformer_heads = 8           # number of attention heads
+positional_encoding = false         # enable/disable positional encoding
+dropout = 0.2                       # dropout between layers
+out_features = 256                  # output feature size before classification
+
+# Loss weighting
+weight_emotion = 1.0
+weight_pers = 1.0
+ssl_weight_emotion = 1.0
+ssl_weight_personality = 0.2
+ssl_confidence_threshold_emo = 0.6
+ssl_confidence_threshold_pt = 0.6
+
+# Loss configuration
+pers_loss_type = "mae"              # options: ccc, mae, mse, rmse_bell, rmse_logcosh, RMGL
+emotion_loss_type = "CE"            # classification loss for emotion
+flag_emo_weight = false             # use class weighting for emotion imbalance
+
+# GradNorm & SSL parameters
+alpha_sup = 1.0
+w_lr_sup = 0.005
+alpha_ssl = 1.5
+w_lr_ssl = 0.01
+lambda_ssl = 0.4
+w_floor = 1e-3
+
+
+# ─────────────────────────────
+# Optimizer Parameters
+# ─────────────────────────────
+[train.optimizer]
+optimizer = "adam"       # "adam", "adamw", "lion", "sgd", "rmsprop"
+lr = 1e-4                # learning rate
+weight_decay = 1e-5      # weight decay for regularization
+momentum = 0.9           # used only for SGD
+
+
+# ─────────────────────────────
+# Scheduler Parameters
+# ─────────────────────────────
+[train.scheduler]
+scheduler_type = "plateau"  # "none", "plateau", "cosine", "onecycle", or HuggingFace variants
+warmup_ratio = 0.1          # ratio of warmup iterations (0.1 = 10%)
+
+
+# ─────────────────────────────
+# Embedding Extractor Settings
+# ─────────────────────────────
+[embeddings]
+image_classifier_checkpoint = "torchscript_model_0_66_37_wo_gl.pth"
+image_model_type = "emo"          # options: resnet18, emo, emo_resnet50, resnet50, clip
+image_embedding_dim = 512         # 2048 (emo_resnet50, resnet50) or 512 (resnet18, emo, clip)
+cut_target_layer = 2              # layer index to cut the model and extract features
+roi_video = "body"                # region of interest: "body" or "scene"
+counter_need_frames = 30          # number of frames to sample uniformly
+image_size = 224                  # image width and height
+emb_normalize = false             # whether to L2-normalize embeddings

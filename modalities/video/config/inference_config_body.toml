@@ -1,0 +1,96 @@
+[datasets.cmu_mosei]
+task = "emotions"
+base_dir = "D:/Databases/CMU-MOSEI/video/"
+csv_path = "{base_dir}/{split}_face_union.csv"
+video_dir  = "{base_dir}/{split}/"
+
+[datasets.fiv2]
+task = "personality_traits"
+base_dir = "E:/Databases/FirstImpressionsV2/"
+csv_path = "{base_dir}/{split}_face_union.csv"
+video_dir  = "{base_dir}/{split}/"
+
+
+[dataloader]
+num_workers = 0
+shuffle = true
+prepare_only = false
+
+# ---------------------------
+# Training — general
+# ---------------------------
+[train.general]
+random_seed = 42                  # fix random seed for reproducibility (0 = random each run)
+subset_size = 0                   # limit number of samples (0 = use full dataset)
+batch_size = 64                   # batch size
+num_epochs = 100                  # number of training epochs
+max_patience = 25                 # max epochs without improvement (Early Stopping)
+save_best_model = true            # save the best model
+save_prepared_data = true         # save extracted features (embeddings)
+save_feature_path = './features/' # path to store embeddings
+search_type = "greedy"            # hyperparam search: "greedy", "exhaustive", or "none"
+opt_set = 'test'                  # split used for optimization
+
+# ---------------------------
+# Model parameters
+# ---------------------------
+[train.model]
+model_name            = "FusionTransformer" # model name: EmotionMamba, PersonalityMamba, EmotionTransformer, PersonalityTransformer, FusionTransformer
+model_stage           = 'fusion'            # training stage: personality, emotion, fusion
+per_activation        = "sigmoid"           # activation for personality head
+weight_emotion        = 0.1                 # emotion loss weight (0.1 when using class weights, 1.0 without)
+weight_pers           = 1                   # personality loss weight
+pers_loss_type        = 'mae'               # ccc, mae, mse, rmse_bell, rmse_logcosh, RMGL
+flag_emo_weight       = true                # use class weights for emotion imbalance
+hidden_dim            = 1024                # hidden size
+num_transformer_heads = 16                  # number of transformer attention heads
+tr_layer_number       = 1                   # number of transformer layers
+mamba_d_state         = 4                   # Mamba state size
+mamba_layer_number    = 1                   # number of Mamba layers
+positional_encoding   = true                # use positional encoding
+dropout               = 0.15                # inter-layer dropout
+out_features          = 128                 # final feature size before classification
+
+# Best parameters for emotion and personality models
+name_best_emo_model             = 'EmotionMamba'
+name_best_per_model             = 'PersonalityMamba'
+path_to_saved_emotion_model     = "clip_emotion_mamba_best_model_dev.pt"          # path to the best emotion model
+path_to_saved_personality_model = "clip_personality_mamba_true_best_model_dev.pt" # path to the best personality model
+
+# Set only at the fusion stage according to the best models
+hidden_dim_emo            = 256
+out_features_emo          = 128
+num_transformer_heads_emo = 2
+tr_layer_number_emo       = 1
+positional_encoding_emo   = true
+mamba_d_state_emo         = 8
+mamba_layer_number_emo    = 2
+
+hidden_dim_per            = 1024
+out_features_per          = 256
+num_transformer_heads_per = 2
+tr_layer_number_per       = 1
+positional_encoding_per   = true
+mamba_d_state_per         = 4
+mamba_layer_number_per    = 1
+
+[train.optimizer]
+optimizer = "adam"
+lr = 1e-4
+weight_decay = 0.0
+momentum = 0.9
+
+[train.scheduler]
+scheduler_type = "plateau"
+warmup_ratio = 0.1
+
+[embeddings]
+image_classifier_checkpoint = "torchscript_model_0_66_37_wo_gl.pth"
+image_model_type = "clip"
+image_embedding_dim = 512
+cut_target_layer = 2
+roi_video = "face"
+counter_need_frames = 30
+image_size = 224
+emb_normalize = false
+device = "cuda"
