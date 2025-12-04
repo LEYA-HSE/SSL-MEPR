@@ -23,6 +23,22 @@ The growing demand for personalized human-computer interaction calls for joint m
 
 ---
 
+## Visualization of model’s attention
+
+![SSL-MEPR Pipeline](docs/heatmaps.jpg)
+
+<p align="center"><em> Figure: Pipeline of semi-supervised multi-task cross-domain learning framework for MEPR.</em></p>
+
+---
+
+
+## User interface of the interactive prototype
+
+![SSL-MEPR Pipeline](docs/GUI.png)
+
+<p align="center"><em> Figure: Pipeline of semi-supervised multi-task cross-domain learning framework for MEPR.</em></p>
+
+---
 ## Branch Descriptions
 
 | Branch | Description |
