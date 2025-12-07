@@ -38,12 +38,12 @@ The growing demand for personalized human-computer interaction calls for joint m
 | Branch | Description |
 |--------|-------------|
 | `main` | Default branch containing general repository information and descriptions. Multimodal Cross-Domain Model integrating outputs from all unimodal models, employing Graph Attention Fusion, Task-Specific Query-Based Multi-Head Cross-Attention, Predict Projectors, and Guide Banks.|
+| [`app`(link)](https://github.com/LEYA-HSE/SSL-MEPR/tree/app) | Gradio-based interactive prototype for running inference with the SSL-MEPR Multimodal Cross-Domain Model and visualizing predictions, attention heatmaps, keyframes, and personality/emotion scores. |
 | `audio_trainer` | Implementation of Audio-based Cross-Domain Model using Wav2Vec2 embeddings and Mamba encoders. |
 | `text_trainer` | Implementation of Text-based Cross-Domain Model using BGE-en embeddings and Transformer encoders. |
 | `face_trainer` | Implementation of Face-based Cross-Domain Model using CLIP embeddings and Mamba encoders. |
 | `body_trainer` | Implementation of Body-based Cross-Domain Model using CLIP embeddings and Mamba encoders. |
 | `scene_trainer` | Implementation of Scene-based Cross-Domain Model using CLIP embeddings and Transformer encoders. |
-
 ---
 
 ## Training Procedure
