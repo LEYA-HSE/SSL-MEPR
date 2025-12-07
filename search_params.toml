@@ -1,0 +1,53 @@
+[grid]
+hidden_dim            = [256, 512, 768]
+dropout               = [0.1, 0.2, 0.3]
+out_features          = [128, 256, 384]
+per_activation        = ["relu"]
+pers_loss_type        = ["mae"]
+# mamba_d_state         = [3, 4, 5, 6, 7]
+# mamba_layer_number    = [6, 7, 8]
+num_transformer_heads = [4, 8]
+tr_layer_number       = [5, 7]
+positional_encoding   = [false, true]
+
+[defaults]
+hidden_dim            = 512
+dropout               = 0.2
+out_features          = 256
+# lr                    = 1e-4
+# per_activation        = "relu"
+pers_loss_type        = "mae"
+# mamba_d_state         = 4
+# mamba_layer_number    = 3
+num_transformer_heads = 4
+tr_layer_number       = 3
+positional_encoding   = false
+# [grid]
+# hidden_dim            = [192]
+# dropout               = [0.2]
+# out_features          = [128]
+# lr                    = [1e-4]
+# per_activation        = ["relu"]
+# pers_loss_type        = ["rmse_gl"]
+# mamba_d_state         = [8]
+# mamba_layer_number    = [5]
+# positional_encoding   = [true, false]
+
+# [defaults]
+# hidden_dim            = 192
+# dropout               = 0.2
+# out_features          = 128
+# lr                    = 1e-4
+# per_activation        = "relu"
+# pers_loss_type        = "mae"
+# mamba_d_state         = 8
+# mamba_layer_number    = 6
+# positional_encoding   = true
+
+
+# num_transformer_heads = [4]
+# tr_layer_number       = [1]
+# mamba_d_state         = [8]
+# mamba_layer_number    = [1]
+# scheduler_type        = ["plateau", "cosine", "onecycle", "huggingface_cosine_with_restarts", "huggingface_cosine", "huggingface_linear"]
+# pers_loss_type        = ["mae", "mse", "rmse", "rmse_bell", "rmse_logcosh", "bell", "logcosh", "rmse_bell_logcosh","bell_logcosh", "gl","bell_logcosh_gl", "rmse_gl", "rmse_bell_gl", "bell_gl", "logcosh_gl"] 
