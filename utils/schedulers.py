@@ -6,6 +6,7 @@ class DummyScheduler:
     def step(self, *args, **kwargs):
         pass
 
+
 class SmartScheduler:
     def __init__(self, scheduler_type, optimizer, config, steps_per_epoch):
         self.scheduler_type = scheduler_type.lower()
@@ -19,7 +20,7 @@ class SmartScheduler:
                 patience=2,
                 min_lr=1e-7
             )
-            logging.info("[Scheduler] Используется ReduceLROnPlateau (по метрике).")
+            logging.info("[Scheduler] Using ReduceLROnPlateau (metric-based).")
 
         elif self.scheduler_type == "cosine":
             self.scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
@@ -27,11 +28,11 @@ class SmartScheduler:
                 T_max=config.num_epochs,
                 eta_min=1e-6
             )
-            logging.info("[Scheduler] Используется CosineAnnealingLR.")
+            logging.info("[Scheduler] Using CosineAnnealingLR.")
 
         elif self.scheduler_type == "onecycle":
             if steps_per_epoch == 0:
-                raise ValueError("train_loader пустой, OneCycle не может работать без данных.")
+                raise ValueError("train_loader is empty; OneCycle requires data.")
             self.scheduler = torch.optim.lr_scheduler.OneCycleLR(
                 optimizer,
                 max_lr=config.lr,
@@ -39,7 +40,7 @@ class SmartScheduler:
                 epochs=config.num_epochs
             )
             self.is_batch_level = True
-            logging.info(f"[Scheduler] Используется OneCycleLR ({steps_per_epoch} шагов на эпоху).")
+            logging.info(f"[Scheduler] Using OneCycleLR ({steps_per_epoch} steps per epoch).")
 
         elif self.scheduler_type.startswith("huggingface_"):
             scheduler_name = self.scheduler_type.replace("huggingface_", "")
@@ -52,21 +53,22 @@ class SmartScheduler:
                 optimizer=optimizer,
                 num_warmup_steps=warmup_steps,
                 num_training_steps=total_steps,
-    )
-            self.is_batch_level = True  # HuggingFace обычно требует шагать по батчам
+            )
+            # HuggingFace schedulers typically step per batch
+            self.is_batch_level = True
             logging.info(f"[Scheduler] HuggingFace: {scheduler_name} — warmup_steps={warmup_steps}, total_steps={total_steps}")
 
         elif self.scheduler_type == "none":
             self.scheduler = DummyScheduler()
-            logging.info("[Scheduler] Нет шедулера (ручное управление lr).")
+            logging.info("[Scheduler] No scheduler (manual LR control).")
 
         else:
-            raise ValueError(f"Неизвестный scheduler_type: {scheduler_type}")
+            raise ValueError(f"Unknown scheduler_type: {scheduler_type}")
 
     def step(self, metric=None, batch_level=False):
         """
-        batch_level=True  ➔ шагать после батча (например, для OneCycle, HuggingFace schedulers)
-        batch_level=False ➔ шагать после эпохи
+        batch_level=True  ➔ step after each batch (e.g., OneCycle, HuggingFace schedulers)
+        batch_level=False ➔ step after each epoch
         """
         if isinstance(self.scheduler, DummyScheduler):
             return
