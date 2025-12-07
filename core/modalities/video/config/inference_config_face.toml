@@ -1,0 +1,106 @@
+# ---------------------------
+# Настройки корпусов данных
+# ---------------------------
+
+[datasets.cmu_mosei]
+task = "emotions"
+base_dir = "D:/Databases/CMU-MOSEI/video/"
+csv_path = "{base_dir}/{split}_face_union.csv"
+video_dir  = "{base_dir}/{split}/"
+
+[datasets.fiv2]
+task = "personality_traits"
+base_dir = "E:/Databases/FirstImpressionsV2/"
+csv_path = "{base_dir}/{split}_face_union.csv"
+video_dir  = "{base_dir}/{split}/"
+
+# ---------------------------
+# DataLoader параметры
+# ---------------------------
+[dataloader]
+num_workers = 0
+shuffle = true
+prepare_only = false
+
+# ---------------------------
+# Общие параметры тренировки
+# ---------------------------
+[train.general]
+random_seed = 42                  # фиксируем random seed для воспроизводимости (0 = каждый раз разный)
+subset_size = 0                   # ограничение на количество примеров (0 = использовать весь датасет)
+batch_size = 64                   # размер батча
+num_epochs = 100                  # число эпох тренировки
+max_patience = 25                 # максимальное число эпох без улучшений (для Early Stopping)
+save_best_model = true            # сохранять лучшую модель
+save_prepared_data = true         # сохранять извлеченные признаки (эмбеддинги)
+save_feature_path = './features/' # путь для сохранения эмбеддингов
+search_type = "greedy"        # стратегия поиска: "greedy", "exhaustive" или "none"
+opt_set = 'test'                   # набор для оптимизации параметров обучения
+
+# ---------------------------
+# Параметры модели
+# ---------------------------
+[train.model]
+model_name            = "FusionTransformer" # название модели EmotionMamba, PersonalityMamba, EmotionTransformer, PersonalityTransformer, FusionTransformer 
+model_stage           = 'fusion' # название этапа personality, emotion, fusion
+per_activation        = "sigmoid"   # sigmoid
+weight_emotion        = 0.1      # для корректировки лосса эмоций 0.1 при взвешивании классов, 1.0 без взвешивания
+weight_pers           = 1        # для корректировки лосса персональных качеств
+pers_loss_type        = 'mae'    # ccc, mae, mse, rmse_bell, rmse_logcosh, RMGL
+flag_emo_weight       = true     # используем веса для дисбаланса эмоциональных классов
+hidden_dim            = 512      # размер скрытого состояния 
+num_transformer_heads = 2        # количество attention голов в трансформере
+tr_layer_number       = 3        # количество слоев в трансформере
+mamba_d_state         = 4       # размер состояния в Mamba
+mamba_layer_number    = 1        # количество слоев Mamba
+positional_encoding   = true    # использовать ли позиционное кодирование
+dropout               = 0.15     # dropout между слоями
+out_features          = 256      # размер финальных признаков перед классификацией
+# best parameters for emotion and personality models
+name_best_emo_model             = 'EmotionMamba'
+name_best_per_model             = 'PersonalityMamba'
+path_to_saved_emotion_model     = "clip_face_emotion_mamba_best_model_dev.pt"
+path_to_saved_personality_model = "clip_face_personality_mamba_best_model_dev.pt"
+hidden_dim_emo                  = 1024  # устанавливается только на этапе fusion согласно лучшей модели
+out_features_emo                = 256   # устанавливается только на этапе fusion согласно лучшей модели
+num_transformer_heads_emo       = 2     # устанавливается только на этапе fusion согласно лучшей модели
+tr_layer_number_emo             = 1     # устанавливается только на этапе fusion согласно лучшей модели
+positional_encoding_emo         = true  # устанавливается только на этапе fusion согласно лучшей модели
+mamba_d_state_emo               = 16    # устанавливается только на этапе fusion согласно лучшей модели
+mamba_layer_number_emo          = 1     # устанавливается только на этапе fusion согласно лучшей модели
+hidden_dim_per                  = 256   # устанавливается только на этапе fusion согласно лучшей модели
+out_features_per                = 512   # устанавливается только на этапе fusion согласно лучшей модели
+num_transformer_heads_per       = 16    # устанавливается только на этапе fusion согласно лучшей модели
+tr_layer_number_per             = 1     # устанавливается только на этапе fusion согласно лучшей модели
+positional_encoding_per         = true  # устанавливается только на этапе fusion согласно лучшей модели
+mamba_d_state_per               = 8    # устанавливается только на этапе fusion согласно лучшей модели
+mamba_layer_number_per          = 1     # устанавливается только на этапе fusion согласно лучшей модели
+best_per_activation             = "sigmoid" # устанавливается только на этапе fusion согласно лучшей модели
+
+# ---------------------------
+# Параметры оптимизатора
+# ---------------------------
+[train.optimizer]
+optimizer = "adam"        # тип оптимизатора: "adam", "adamw", "lion", "sgd", "rmsprop"
+lr = 1e-4                 # начальная скорость обучения
+weight_decay = 0.0        # weight decay для регуляризации
+momentum = 0.9            # momentum (используется только в SGD)
+
+# ---------------------------
+# Параметры шедулера
+# ---------------------------
+[train.scheduler]
+scheduler_type = "plateau" # тип шедулера: "none", "plateau", "cosine", "onecycle" ил  и HuggingFace-стиль ("huggingface_linear", "huggingface_cosine" "huggingface_cosine_with_restarts" и т.д.)
+warmup_ratio = 0.1         # отношение количества warmup-итераций к общему числу шагов (0.1 = 10%)
+
+[embeddings]
+image_classifier_checkpoint = "torchscript_model_0_66_37_wo_gl.pth"
+image_model_type = "clip"  # resnet18, emo, емоresnet50, resnet50, clip, body_movement
+image_embedding_dim = 512   # 2048 (емоresnet50, resnet50) и 512 (resnet18, emo, clip), 34 (body_movement) размерность видео-эмбеддинга
+cut_target_layer = 2        # 4 (емоresnet50) и 2 (resnet18, resnet50) и 3 (emo) слой до какого обрезать модель и извлечь фичи
+roi_video = "face" # область интереса или либо body или вся scene, body_movement или face
+counter_need_frames = 30    # сколько кадров отобрать из всех возможных с равномерным шагом
+image_size = 224            # ширина и высота изображения
+emb_normalize = false       # нормализовать ли вектор L2-нормой
+device = "cuda"             # "cuda" или "cpu", куда грузить модел
+
